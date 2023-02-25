@@ -1,6 +1,7 @@
 <?php include("include/common.php"); ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,15 +9,29 @@
 	<title>Document</title>
 	<link rel="stylesheet" href="<?php asset("css/style.css"); ?>">
 </head>
-<body>
-	
-</body>
-</html>
 
+<body style="padding: 20px;">
+
+	<form action="" enctype="multipart/form-data" method="post">
+		<h2>Multiple files upload</h2>
+		<input type="file" name="my_file[]" multiple>
+		<br><br>
+		<input type="submit" value="Upload">
+	</form>
+
+	<br>
+	<form action="" enctype="multipart/form-data" method="post">
+		<h2>Single file upload</h2>
+		<input type="file" name="my_file">
+		<br><br>
+		<input type="submit" value="Upload">
+	</form>
+</body>
+
+</html>
 <?php
 
-$x = db_select("select * from trnuser");
-
-dumpData($x);
+// Upload file, sử dụng name của thẻ input
+upload_and_return_filename("my_file");
 
 ?>
