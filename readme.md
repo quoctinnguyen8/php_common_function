@@ -3,7 +3,7 @@
 Cách dùng:
 1. Copy file `common.php` và `config.php` vào project của các bạn
 2. **Thay đổi thông tin ở file `config.php`** cho phù hợp với project hiện tại
-3. Dùng lệnh `include("common.php")` vào file cần sử dụng các hàm hỗ trợ bên dưới. (Chú ý đường dẫn file)
+3. Dùng lệnh `include("include/common.php")` vào file cần sử dụng các hàm hỗ trợ bên dưới. (Chú ý đường dẫn file)
 
 ## Danh sách các function được hỗ trợ, hoạt động tốt nhất với cấu hình mặc định của XAMPP
 
