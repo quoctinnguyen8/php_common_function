@@ -10,11 +10,11 @@ function js_alert(string $text)
 	echo "<script>alert('" . addslashes($text) . "');</script>";
 }
 
-function is_method_post()
+function is_method_post(): bool
 {
 	return $_SERVER['REQUEST_METHOD'] == 'POST';
 }
-function is_method_get()
+function is_method_get(): bool
 {
 	return $_SERVER['REQUEST_METHOD'] == 'GET';
 }
@@ -126,7 +126,7 @@ function upload_and_return_filename(string $name, string $sub_folder = "")
 /*
  * Xóa file trong thư mục upload, return false nếu xóa thất bại
  */
-function remove_file(string $filename)
+function remove_file(string $filename): bool
 {
 	$path = trim($filename, "/");
 	$full_path = DOCUMENT_ROOT_PATH . UPLOAD_PATH . "/" . $path;
@@ -165,7 +165,7 @@ function execute_query(&$conn, $sql, $data)
 	$query = $conn->prepare($sql);
 	if (!empty($data)) {
 		foreach ($data as $i => $x) {
-			$data[$i] = htmlspecialchars($x);
+			$data[$i] = $x;
 		}
 		$query->bind_param($type, ...$data);
 	}
@@ -173,7 +173,7 @@ function execute_query(&$conn, $sql, $data)
 	return $query;
 }
 
-function db_select($sql, array $data = null): array
+function db_select(string $sql, array $data = null): array
 {
 	try {
 		$query = execute_query($conn, $sql, $data);
@@ -191,13 +191,13 @@ function db_select($sql, array $data = null): array
 	}
 }
 
-function db_execute($sql, array $data = null): bool
+function db_execute(string $sql, array $data = null): bool
 {
 	try {
 		$query = execute_query($conn, $sql, $data);
 		$affected = $query->affected_rows;
 		$conn->close();
-		return $affected;
+		return $affected > 0;
 	} catch (Exception $ex) {
 		dd($ex->getMessage(), "Query: $sql", $ex->getTraceAsString(), $data);
 	}
@@ -206,7 +206,7 @@ function db_execute($sql, array $data = null): bool
 /*
  * Dùng để tạo thẻ option (trong thẻ select) từ database
  */
-function gen_option($table, $col_value = "`id`", $col_text = "`name`", $selected_value = "")
+function gen_option_ele($table, $col_value = "`id`", $col_text = "`name`", $selected_value = "")
 {
 	$sql = "select $col_value, $col_text from $table order by $col_value desc";
 	$data = db_select($sql);
@@ -217,13 +217,14 @@ function gen_option($table, $col_value = "`id`", $col_text = "`name`", $selected
 	$col_text = str_replace("`", "", $col_text);
 	$str = "";
 	foreach ($data as $item) {
+		$text = htmlentities($item[$col_text]);
 		if ($item[$col_value] == $selected_value) {
-			$str .= "<option value='$item[$col_value]' selected>$item[$col_text]</option>";
+			$str .= "<option value='$item[$col_value]' selected>$text</option>";
 		} else {
-			$str .= "<option value='$item[$col_value]'>$item[$col_text]</option>";
+			$str .= "<option value='$item[$col_value]'>$text</option>";
 		}
 	}
-	return $str;
+	echo $str;
 }
 
 /*
