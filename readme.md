@@ -118,7 +118,7 @@ db_execute($sql, [$id, $class_id, $name]);
 
 ```
 
-### 11. `function gen_option_ele($table, $col_value, $col_text, $selected_value)`
+### 11. `gen_option_ele($table, $col_value, $col_text, $selected_value)`
 
 Tạo thẻ `option` với dữ liệu từ database
 
