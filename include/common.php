@@ -25,12 +25,22 @@ function is_method_get(): bool
 function redirect_to(string $page)
 {
 	$page = ROOT_PATH . "/$page";
+	$page = str_replace("///", "/", $page);
 	$page = str_replace("//", "/", $page);
-	if ($page[0] == "/") {
-		$page = substr($page, 1);
-	}
-	if (!empty($page)) {
-		header("Location: /$page");
+	header("Location: /$page");
+}
+
+/*
+ * Chuyển hướng đến trang khác trong hệ thống (dùng JS)
+ */
+function js_redirect_to(string $page, bool $is_stop = true)
+{
+	$page = ROOT_PATH . "/$page";
+	$page = str_replace("///", "/", $page);
+	$page = str_replace("//", "/", $page);
+	echo "<script>location.href = '$page';</script>";
+	if ($is_stop){
+		die;
 	}
 }
 
@@ -77,6 +87,7 @@ function upload_and_return_filename(string $name, string $sub_folder = "")
 		if (!empty($sub_folder)) {
 			$upload_path = trim($upload_path, "/\\") . "/" . $sub_folder;
 		}
+		// Tạo thư mục nếu chưa có
 		if (!file_exists($upload_path)) {
 			mkdir($upload_path);
 		}

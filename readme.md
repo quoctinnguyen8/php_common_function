@@ -16,12 +16,14 @@ Dump data ra màn hình *và dừng xử lý*
 
 Hiển thị alert của JS
 
-### 3. `redirect_to(string $page)`
+### 3. `redirect_to(string $page)` và `js_redirect_to(string $page)`
 
 Chuyển hướng đến trang trong hệ thống, không bao gồm thư mục gốc.
 Ví dụ: nếu website đặt ở `htdocs/test` và bạn muốn chuyển hướng đến `test/admin/abc.php` thì chỉ cần viết
-`redirect_to("admin/abc.php")`
+`redirect_to("admin/abc.php")` hoặc  `js_redirect_to("admin/abc.php")`
 > Lưu ý rằng hàm này chỉ cho phép chuyển hướng dựa trên đường dẫn tuyệt đối, chưa hỗ trợ chuyển hướng bằng đường dẫn tương đối
+>
+> Hàm `js_redirect_to()` sử dụng JavaScript để chuyển hướng, dùng khi muốn thông báo (`js_alert()`) và chuyển hướng trang
 
 ### 4. Hàm hỗ trợ kiểm tra HttpMethod `is_method_post(): bool` và `is_method_get(): bool`
 
