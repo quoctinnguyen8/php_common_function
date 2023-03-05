@@ -25,9 +25,13 @@ function is_method_get(): bool
 function redirect_to(string $page)
 {
 	$page = ROOT_PATH . "/$page";
-	$page = str_replace("///", "/", $page);
 	$page = str_replace("//", "/", $page);
-	header("Location: /$page");
+	if ($page[0] == "/") {
+		$page = substr($page, 1);
+	}
+	if (!empty($page)) {
+		header("Location: /$page");
+	}
 }
 
 /*
@@ -36,9 +40,13 @@ function redirect_to(string $page)
 function js_redirect_to(string $page, bool $is_stop = true)
 {
 	$page = ROOT_PATH . "/$page";
-	$page = str_replace("///", "/", $page);
 	$page = str_replace("//", "/", $page);
-	echo "<script>location.href = '$page';</script>";
+	if ($page[0] == "/") {
+		$page = substr($page, 1);
+	}
+	if (!empty($page)) {
+		echo "<script>location.href = '/$page';</script>";
+	}
 	if ($is_stop){
 		die;
 	}
