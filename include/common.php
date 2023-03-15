@@ -55,7 +55,7 @@ function js_redirect_to(string $page, bool $is_stop = true)
 /*
  * In ra đường dẫn đến file ở thư mục asset
  */
-function asset(string $filename)
+function asset(string $filename, bool $return = false)
 {
 	$path = trim($filename, "/");
 	$full_path = ASSET_PATH . "/" . $path;
@@ -64,13 +64,14 @@ function asset(string $filename)
 		// Xóa cache khi cập nhật file asset bằng cách thêm param lần ghi cuối cùng
 		$full_path .= "?" . filemtime(DOCUMENT_ROOT_PATH . $full_path);
 	}
+	if ($return) return $full_path;
 	echo $full_path;
 }
 
 /*
  * In ra đường dẫn đến file ở thư mục upload
  */
-function upload(string $filename)
+function upload(string $filename, bool $return = false)
 {
 	$path = trim($filename, "/");
 	$full_path = UPLOAD_PATH . "/" . $path;
@@ -79,6 +80,7 @@ function upload(string $filename)
 		// Xóa cache khi cập nhật file asset bằng cách thêm param lần ghi cuối cùng
 		$full_path .= "?" . filemtime(DOCUMENT_ROOT_PATH . $full_path);
 	}
+	if ($return) return $full_path;
 	echo $full_path;
 }
 
@@ -97,7 +99,7 @@ function upload_and_return_filename(string $name, string $sub_folder = "")
 		}
 		// Tạo thư mục nếu chưa có
 		if (!file_exists($upload_path)) {
-			mkdir($upload_path);
+			mkdir($upload_path, 0777, true);
 		}
 
 		$filenames = $_FILES[$name]["name"];
