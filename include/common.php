@@ -106,6 +106,8 @@ function upload_and_return_filename(string $name, string $sub_folder = "")
 		$tmp_file = $_FILES[$name]["tmp_name"];
 		$file_size = $_FILES[$name]["size"];
 
+		if ($file_size <= 0) return null;
+
 		if (is_array($filenames)) {
 			// Upload nhiều file
 			$all_filenames = [];
