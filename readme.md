@@ -29,9 +29,10 @@ Ví dụ: nếu website đặt ở `htdocs/test` và bạn muốn chuyển hư�
 
 Như tên hàm, cho phép kiểm tra request là POST hay GET
 
-### 5. `asset(string $filename)`
+### 5. `asset(string $filename, bool $return = false): null|string`
 
-Cho phép lấy đường dẫn file CSS/JS/ảnh từ thư mục asset và in ra trình duyệt, đường dẫn bao gồm param để cập nhật ngay lập tức khi file có thay đổi
+Cho phép lấy đường dẫn file CSS/JS/ảnh từ thư mục asset và in ra trình duyệt, đường dẫn bao gồm param để cập nhật ngay lập tức khi file có thay đổi.
+Cho phép nhận chuỗi đường dẫn của file nếu param thứ 2 là `true`
 
 > Thư mục asset có thể được cấu hình ở file `config.php`
 
@@ -39,13 +40,20 @@ Cho phép lấy đường dẫn file CSS/JS/ảnh từ thư mục asset và in r
 // CSS
 <link rel="stylesheet" href="<?php asset("css/style.css"); ?>">
 
+// hoặc
+<?php
+$path = asset("css/style.css", true);
+?>
+<link rel="stylesheet" href="<?php echo $path; ?>">
+
 // JS
 <script src="<?php asset("js/script.js"); ?>"></script>
 ```
 
-### 6. `upload(string $filename)`
+### 6. `upload(string $filename, bool $return = false): null|string`
 
-Tương tự như hàm `asset` nhưng dùng cho file upload bởi user (file upload được đặt ở thư mục riêng)
+Tương tự như hàm `asset` nhưng dùng cho file upload bởi user (file upload được đặt ở thư mục riêng).
+Cho phép nhận chuỗi đường dẫn của file nếu param thứ 2 là `true`
 > Thư mục upload cũng có thể được cấu hình ở file `config.php`
 
 ```php

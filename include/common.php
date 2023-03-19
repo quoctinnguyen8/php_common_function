@@ -47,7 +47,7 @@ function js_redirect_to(string $page, bool $is_stop = true)
 	if (!empty($page)) {
 		echo "<script>location.href = '/$page';</script>";
 	}
-	if ($is_stop){
+	if ($is_stop) {
 		die;
 	}
 }
@@ -55,8 +55,9 @@ function js_redirect_to(string $page, bool $is_stop = true)
 /*
  * In ra đường dẫn đến file ở thư mục asset
  */
-function asset(string $filename, bool $return = false)
+function asset(?string $filename, bool $return = false)
 {
+	if (is_null($filename)) $filename = "";
 	$path = trim($filename, "/");
 	$full_path = ASSET_PATH . "/" . $path;
 
@@ -71,8 +72,9 @@ function asset(string $filename, bool $return = false)
 /*
  * In ra đường dẫn đến file ở thư mục upload
  */
-function upload(string $filename, bool $return = false)
+function upload(?string $filename, bool $return = false)
 {
+	if (is_null($filename)) $filename = "";
 	$path = trim($filename, "/");
 	$full_path = UPLOAD_PATH . "/" . $path;
 
@@ -234,9 +236,11 @@ function gen_option_ele($table, $col_value = "`id`", $col_text = "`name`", $sele
 	$sql = "select $col_value, $col_text from $table order by $col_value desc";
 	$data = db_select($sql);
 
-	$col_value = end(explode(" as ", $col_value));
+	$tmp = explode(" as ", $col_value);
+	$col_value = end($tmp);
 	$col_value = str_replace("`", "", $col_value);
-	$col_text = end(explode(" as ", $col_text));
+	$tmp = explode(" as ", $col_text);
+	$col_text = end($tmp);
 	$col_text = str_replace("`", "", $col_text);
 	$str = "";
 	foreach ($data as $item) {
