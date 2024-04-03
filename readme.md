@@ -25,7 +25,7 @@ Ví dụ: nếu website đặt ở `htdocs/test` và bạn muốn chuyển hư�
 >
 > Hàm `js_redirect_to()` sử dụng JavaScript để chuyển hướng, dùng khi muốn thông báo (`js_alert()`) và chuyển hướng trang
 
-### 4. Hàm hỗ trợ kiểm tra HttpMethod `is_method_post(): bool` và `is_method_get(): bool`
+### 4. Hàm hỗ trợ kiểm tra HttpMethod `is_post_method(): bool` và `is_get_method(): bool`
 
 Như tên hàm, cho phép kiểm tra request là POST hay GET
 

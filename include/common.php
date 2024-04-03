@@ -10,11 +10,11 @@ function js_alert(string $text)
 	echo "<script>alert('" . addslashes($text) . "');</script>";
 }
 
-function is_method_post(): bool
+function is_post_method(): bool
 {
 	return $_SERVER['REQUEST_METHOD'] == 'POST';
 }
-function is_method_get(): bool
+function is_get_method(): bool
 {
 	return $_SERVER['REQUEST_METHOD'] == 'GET';
 }
@@ -92,7 +92,7 @@ function upload(?string $filename, bool $return = false)
  */
 function upload_and_return_filename(string $name, string $sub_folder = "")
 {
-	if (is_method_post() && isset($_FILES[$name])) {
+	if (is_post_method() && isset($_FILES[$name])) {
 		// Xóa dấu slash (gạch chéo) khỏi folder để tiện xử lý sau này
 		$sub_folder = trim($sub_folder, "/\\");
 		$upload_path = DOCUMENT_ROOT_PATH . UPLOAD_PATH;
