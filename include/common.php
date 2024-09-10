@@ -31,6 +31,7 @@ function redirect_to(string $page)
 	}
 	if (!empty($page)) {
 		header("Location: /$page");
+		exit();
 	}
 }
 
