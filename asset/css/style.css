@@ -3,3 +3,7 @@
 	margin: 0;
 	box-sizing: 0;
 }
+
+button, input[type=submit], input[type=button]{
+	padding: 5px 10px;
+}

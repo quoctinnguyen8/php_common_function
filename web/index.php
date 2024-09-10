@@ -1,4 +1,4 @@
-<?php include("include/common.php"); ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,7 +7,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Document</title>
-	<link rel="stylesheet" href="<?php asset("css/style.css"); ?>">
+	<link rel="stylesheet" href="<?= asset("css/style.css"); ?>">
 </head>
 
 <body style="padding: 20px;">
@@ -26,6 +26,9 @@
 		<br><br>
 		<input type="submit" value="Upload">
 	</form>
+
+	<br />
+	<a href="<?=route("lienhe"); ?>">Nhấn để vào trang liên hệ</a>
 </body>
 
 </html>

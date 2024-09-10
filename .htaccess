@@ -1,0 +1,11 @@
+# Thay đổi trang chủ mặc định thành web.php
+DirectoryIndex web.php
+
+# Điều hướng tất cả các trang đều chạy qua web.php, ngoại trừ thư mục asset
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteCond %{REQUEST_URI} !^/php_common_function/asset/
+
+RewriteRule ^.*$ /php_common_function/web.php [L,QSA]
