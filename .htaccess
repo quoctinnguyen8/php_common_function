@@ -1,11 +1,13 @@
+RewriteEngine On
+
 # Thay đổi trang chủ mặc định thành web.php
 DirectoryIndex web.php
 
-# Điều hướng tất cả các trang đều chạy qua web.php, ngoại trừ thư mục asset
-RewriteEngine on
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-
+# Điều hướng tất cả các trang đều chạy qua web.php
+# Ngoại trừ thư mục /asset và /upload (các file trong 2 thư mục này vẫn có thể truy cập trực tiếp)
 RewriteCond %{REQUEST_URI} !^/php_common_function/asset/
+RewriteCond %{REQUEST_URI} !^/php_common_function/upload/
+# Ngoại trừ web.php để tránh bị lặp vô tận
+RewriteCond %{REQUEST_URI} !^/php_common_function/web.php$
 
-RewriteRule ^.*$ /php_common_function/web.php [L,QSA]
+RewriteRule ^(.*)$ /php_common_function/web.php [L,QSA]

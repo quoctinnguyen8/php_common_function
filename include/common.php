@@ -24,11 +24,7 @@ function is_get_method(): bool
  */
 function redirect_to(string $page)
 {
-	$page = RELATIVE_ROOT_PATH . "/$page";
-	$page = str_replace("//", "/", $page);
-	if ($page[0] == "/") {
-		$page = substr($page, 1);
-	}
+	$page = ltrim($page, "\\/ ");
 	if (!empty($page)) {
 		header("Location: /$page");
 		exit();
@@ -40,11 +36,7 @@ function redirect_to(string $page)
  */
 function js_redirect_to(string $page, bool $is_stop = true)
 {
-	$page = RELATIVE_ROOT_PATH . "/$page";
-	$page = str_replace("//", "/", $page);
-	if ($page[0] == "/") {
-		$page = substr($page, 1);
-	}
+	$page = ltrim($page, "\\/ ");
 	if (!empty($page)) {
 		echo "<script>location.href = '/$page';</script>";
 	}
@@ -285,8 +277,8 @@ function handle_request($notFoundCallback = null)
 		} else if (is_string($web_routes[$url])) {
 			$path = $web_routes[$url];
 		}
-		
 	}
+	$path = ltrim($path, " /\\");
 	if (file_exists($path)) {
 		include $path;
 	} else {
