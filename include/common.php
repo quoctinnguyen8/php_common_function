@@ -281,7 +281,19 @@ function handle_request($notFoundCallback = null)
 	}
 	$path = ltrim($path, " /\\");
 	if (file_exists($path)) {
-		include $path;
+		// Chạy trước file $path, nếu có lỗi phát sinh thì xóa nội dung và hiển thị lỗi
+		try{
+			ob_start();
+			include $path;
+			$page_content = ob_get_contents();
+			ob_end_clean();
+			echo $page_content;
+		}catch(Exception $ex){
+			ob_end_clean();
+			echo "<pre>File $path" . "\n\n" . 
+				$ex->getMessage() . "\n\n" .
+				$ex->getTraceAsString() . "</pre>";
+		}
 	} else {
 		if ($notFoundCallback != null) {
 			$notFoundCallback();
@@ -306,5 +318,5 @@ function route(string $name, array $params = null)
 		}
 	}
 	// Lỗi nếu không tìm thấy router
-	dd("\"'> Không tìm thấy [$name] trong hệ thống đường dẫn của trang web");
+	throw new Exception("Không tìm thấy [$name] trong hệ thống đường dẫn của trang web");
 }
