@@ -56,7 +56,7 @@ function js_redirect_to(string $page, bool $is_stop = true)
 /*
  * In ra đường dẫn đến file ở thư mục asset
  */
-function asset(?string $filename, bool $return = false)
+function asset(?string $filename, bool $return = true)
 {
 	if (is_null($filename)) $filename = "";
 	$path = trim($filename, "/");
@@ -73,7 +73,7 @@ function asset(?string $filename, bool $return = false)
 /*
  * In ra đường dẫn đến file ở thư mục upload
  */
-function upload(?string $filename, bool $return = false)
+function upload(?string $filename, bool $return = true)
 {
 	if (is_null($filename)) $filename = "";
 	$path = trim($filename, "/");
@@ -217,11 +217,12 @@ function db_select(string $sql, array $data = null): array
 	}
 }
 
-function db_execute(string $sql, array $data = null): bool
+function db_execute(string $sql, array $data = null, &$insert_id = null): bool
 {
 	try {
 		$query = execute_query($conn, $sql, $data);
 		$affected = $query->affected_rows;
+		$insert_id = $conn->insert_id;
 		$conn->close();
 		return $affected > 0;
 	} catch (Exception $ex) {
