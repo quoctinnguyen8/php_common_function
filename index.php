@@ -32,6 +32,15 @@
 <?php
 
 // Upload file, sử dụng name của thẻ input
-upload_and_return_filename("my_file");
+$uploaded_files = upload_and_return_filename("my_file");
+
+// In đường dẫn file vừa upload ra màn hình
+if (is_array($uploaded_files)) {
+	foreach ($uploaded_files as $file) {
+		echo "<p>" . upload($file) . "</p>";
+	}
+} else {
+	echo "<p>" . upload($uploaded_files) . "</p>";
+}
 
 ?>

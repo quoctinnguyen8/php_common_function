@@ -5,6 +5,16 @@ Cách dùng:
 2. **Thay đổi thông tin ở file `config.php`** cho phù hợp với project hiện tại
 3. Dùng lệnh `include("include/common.php")` vào file cần sử dụng các hàm hỗ trợ bên dưới. (Chú ý đường dẫn file)
 
+## Cấu hình môi trường
+
+Trong file `config.php`, có thể cấu hình biến `ENVIRONMENT`:
+- **`development`**: Hiển thị chi tiết lỗi khi có exception (dùng cho môi trường phát triển)
+- **`production`**: Ẩn chi tiết lỗi, chỉ hiển thị thông báo chung và tự động ghi log vào thư mục `logs/` với format file `yyyy_MM_dd.log`
+
+```php
+define('ENVIRONMENT', 'development'); // Hoặc 'production'
+```
+
 ## Danh sách các function được hỗ trợ, hoạt động tốt nhất với cấu hình mặc định của XAMPP
 
 ### 1. `dd(...$data)`

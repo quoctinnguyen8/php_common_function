@@ -271,6 +271,60 @@ function get_sql_prepared(array $data = null)
 }
 
 /**
+ * Ghi log lỗi vào file với format yyyy_MM_dd.log
+ * 
+ * @param string $message Nội dung lỗi cần ghi log
+ * @param string $sql Câu lệnh SQL (nếu có)
+ * @param array|null $data Dữ liệu parameters (nếu có)
+ * @return void
+ */
+function log_error(string $message, string $sql = "", $data = null)
+{
+	// Tạo thư mục logs nếu chưa tồn tại
+	$log_dir = DOCUMENT_ROOT_PATH . LOG_PATH;
+	if (!file_exists($log_dir)) {
+		mkdir($log_dir, 0777, true);
+	}
+	
+	// Tên file theo format yyyy_MM_dd.log
+	$log_file = $log_dir . "/" . date('Y_m_d') . ".log";
+	
+	// Nội dung log
+	$log_content = "[" . date('Y-m-d H:i:s') . "] ERROR: " . $message . "\n";
+	if (!empty($sql)) {
+		$log_content .= "SQL: " . $sql . "\n";
+	}
+	if (!empty($data)) {
+		$log_content .= "Data: " . print_r($data, true) . "\n";
+	}
+	$log_content .= "---\n";
+	
+	// Ghi vào file
+	file_put_contents($log_file, $log_content, FILE_APPEND);
+}
+
+/**
+ * Hiển thị lỗi dựa trên môi trường (development/production)
+ * 
+ * @param Exception $ex Exception object
+ * @param string $sql Câu lệnh SQL (nếu có)
+ * @param array|null $data Dữ liệu parameters (nếu có)
+ * @param int $status_code Mã lỗi HTTP
+ * @return void
+ */
+function handle_error(Exception $ex, string $sql = "", $data = null, int $status_code = 500)
+{
+	if (ENVIRONMENT === 'production') {
+		// Môi trường production: log lỗi và hiển thị thông báo chung
+		log_error($ex->getMessage() . "\n" . $ex->getTraceAsString(), $sql, $data);
+		dd("Đã xảy ra lỗi khi thực hiện yêu cầu này ($status_code)");
+	} else {
+		// Môi trường development: hiển thị chi tiết lỗi
+		dd($ex->getMessage(), "Query: $sql", $ex->getTraceAsString(), $data);
+	}
+}
+
+/**
  * Tạo kết nối MySQL từ thông tin trong config.php
  * 
  * Tự động bật error reporting và set charset UTF8
@@ -335,7 +389,7 @@ function db_select(string $sql, array $data = null): array
 		$conn->close();
 		return $arr_result;
 	} catch (Exception $ex) {
-		dd($ex->getMessage(), "Query: $sql", $ex->getTraceAsString(), $data);
+		handle_error($ex, $sql, $data, 500);
 		return [];
 	}
 }
@@ -361,7 +415,7 @@ function db_execute(string $sql, array $data = null, &$insert_id = null): bool
 		$conn->close();
 		return $affected > 0;
 	} catch (Exception $ex) {
-		dd($ex->getMessage(), "Query: $sql", $ex->getTraceAsString(), $data);
+		handle_error($ex, $sql, $data, 500);
 		return false;
 	}
 }

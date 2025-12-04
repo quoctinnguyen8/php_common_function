@@ -16,6 +16,14 @@ define('UPLOAD_PATH', ROOT_PATH . "/upload");
 // Đường dẫn đầy đủ đến thư mục hiện tại, không cần chỉnh sửa nếu dùng XAMPP
 define('DOCUMENT_ROOT_PATH', $_SERVER["DOCUMENT_ROOT"]);
 
+// Thư mục chứa log files
+define('LOG_PATH', ROOT_PATH . "/logs");
+
+// Môi trường: 'development' hoặc 'production'
+// development: hiển thị chi tiết lỗi
+// production: ẩn chi tiết lỗi, chỉ hiển thị thông báo chung và log vào file
+define('ENVIRONMENT', 'development');
+
 // Thông tin đăng nhập database
 $database = [
 	"host" => "localhost",

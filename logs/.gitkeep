@@ -1,0 +1,3 @@
+# Folder chứa log files
+# Log files sẽ không được commit vào git (xem .gitignore)
+# Chỉ ghi log khi biến môi trường ENVIRONMENT là "production"

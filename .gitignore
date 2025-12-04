@@ -1,0 +1,10 @@
+# Log files
+logs/*.log
+
+# Ignore all files in logs except .gitkeep
+logs/*
+!logs/.gitkeep
+
+# Upload files
+upload/*
+!upload/.gitkeep
