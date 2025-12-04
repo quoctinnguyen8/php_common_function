@@ -29,50 +29,49 @@ Ví dụ: nếu website đặt ở `htdocs/test` và bạn muốn chuyển hư�
 
 Như tên hàm, cho phép kiểm tra request là POST hay GET
 
-### 5. `asset(string $filename, bool $return = false): null|string`
+### 5. `asset(string $filename, bool $return = true): null|string`
 
 Cho phép lấy đường dẫn file CSS/JS/ảnh từ thư mục asset và in ra trình duyệt, đường dẫn bao gồm param để cập nhật ngay lập tức khi file có thay đổi.
-Cho phép nhận chuỗi đường dẫn của file nếu param thứ 2 là `true`
 
 > Thư mục asset có thể được cấu hình ở file `config.php`
 
 ```php
 // CSS
-<link rel="stylesheet" href="<?php asset("css/style.css"); ?>">
+<link rel="stylesheet" href="<?= asset("css/style.css"); ?>">
 
 // hoặc
-<?php
-$path = asset("css/style.css", true);
-?>
-<link rel="stylesheet" href="<?php echo $path; ?>">
+<link rel="stylesheet" href="<?php echo asset("css/style.css", false); ?>">
 
 // JS
-<script src="<?php asset("js/script.js"); ?>"></script>
+<script src="<?= asset("js/script.js"); ?>"></script>
 ```
 
-### 6. `upload(string $filename, bool $return = false): null|string`
+### 6. `upload(string $filename, bool $return = true): null|string`
 
 Tương tự như hàm `asset` nhưng dùng cho file upload bởi user (file upload được đặt ở thư mục riêng).
-Cho phép nhận chuỗi đường dẫn của file nếu param thứ 2 là `true`
+
 > Thư mục upload cũng có thể được cấu hình ở file `config.php`
 
 ```php
 // Hiển thị ảnh được upload bởi user
-<img src="<?php upload("abc.jpg"); ?>" />
+<img src="<?= upload("abc.jpg"); ?>" />
 ```
 
 ### 7. `upload_and_return_filename(string $name, string $sub_folder = ""): string|array`
 
-Cho phép upload file của user lên web và return tên file đó. Trường hợp upload nhiều file thì return mảng các tên file.
+Cho phép upload file của user lên web và nhận lại tên file đó. Trường hợp upload nhiều file thì return mảng các tên file.
 
-> Thư mục upload cũng có thể được cấu hình ở file `config.php`
+> Thư mục upload có thể được cấu hình ở file `config.php`
 > 
 > Xem thêm ví dụ ở file `index.php`
 
 ```php
 <?php
 // Upload file tải lên vào thư mục files (trong thư mục upload)
-upload_and_return_filename("my_file", "files");
+$filename = upload_and_return_filename("my_file", "files");
+
+// Các thao tác khác
+
 ```
 
 ### 8. `remove_file(string $filename): bool`
