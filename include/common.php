@@ -2,59 +2,123 @@
 
 include("config.php");
 
-/*
- * Hiển thị alert
+/**
+ * Hiển thị hộp thoại alert bằng JavaScript
+ * 
+ * @param string $text Nội dung cần hiển thị trong alert
+ * @return void
  */
 function js_alert(string $text)
 {
 	echo "<script>alert('" . addslashes($text) . "');</script>";
 }
 
+/**
+ * Kiểm tra xem request hiện tại có phải là POST method hay không
+ * 
+ * @return bool True nếu là POST, false nếu không
+ */
 function is_post_method(): bool
 {
 	return $_SERVER['REQUEST_METHOD'] == 'POST';
 }
+
+/**
+ * Kiểm tra xem request hiện tại có phải là GET method hay không
+ * 
+ * @return bool True nếu là GET, false nếu không
+ */
 function is_get_method(): bool
 {
 	return $_SERVER['REQUEST_METHOD'] == 'GET';
 }
 
-/*
- * Chuyển hướng đến trang khác trong hệ thống
+/**
+ * Chuyển hướng đến trang khác trong hệ thống bằng HTTP header
+ * 
+ * Hỗ trợ 3 loại đường dẫn:
+ * - Tương đối: Tự động thêm ROOT_PATH. VD: "admin/index.php" -> "/php_common_function/admin/index.php"
+ * - Tuyệt đối: Bắt đầu bằng "~/" để bỏ qua ROOT_PATH. VD: "~/login.php" -> "/login.php"
+ * - Trang chủ: Dùng "/" để về trang chủ (bao gồm ROOT_PATH nếu có)
+ * 
+ * @param string $page Đường dẫn đến trang cần chuyển hướng
+ * @return void Script sẽ dừng sau khi gọi hàm này
  */
 function redirect_to(string $page)
 {
-	$page = ROOT_PATH . "/$page";
-	$page = str_replace("//", "/", $page);
-	if ($page[0] == "/") {
-		$page = substr($page, 1);
-	}
-	if (!empty($page)) {
-		header("Location: /$page");
+	// Nếu là "/" thì redirect về trang chủ (bao gồm ROOT_PATH)
+	if ($page === '/') {
+		$home_path = ROOT_PATH ? ROOT_PATH : '/';
+		header("Location: $home_path");
 		exit();
 	}
+	// Nếu bắt đầu bằng ~/ thì là đường dẫn tuyệt đối (absolute path)
+	if (strpos($page, '~/') === 0) {
+		$page = substr($page, 2); // Bỏ ký tự ~/
+		$page = '/' . ltrim($page, '/');
+		header("Location: $page");
+		exit();
+	}
+	// Ngược lại là đường dẫn tương đối (relative path)
+	$page = ltrim($page, '/');
+	$full_path = ROOT_PATH . '/' . $page;
+	$full_path = str_replace('//', '/', $full_path);
+	$full_path = '/' . ltrim($full_path, '/');
+	header("Location: $full_path");
+	exit();
 }
 
-/*
- * Chuyển hướng đến trang khác trong hệ thống (dùng JS)
+/**
+ * Chuyển hướng đến trang khác trong hệ thống bằng JavaScript
+ * 
+ * Hỗ trợ 3 loại đường dẫn tương tự redirect_to()
+ * Dùng khi cần thông báo (js_alert) trước khi chuyển hướng
+ * 
+ * @param string $page Đường dẫn đến trang cần chuyển hướng
+ * @param bool $is_stop True (mặc định) để dừng script sau khi redirect, false để tiếp tục
+ * @return void
  */
 function js_redirect_to(string $page, bool $is_stop = true)
 {
-	$page = ROOT_PATH . "/$page";
-	$page = str_replace("//", "/", $page);
-	if ($page[0] == "/") {
-		$page = substr($page, 1);
+	// Nếu là "/" thì redirect về trang chủ (bao gồm ROOT_PATH)
+	if ($page === '/') {
+		$home_path = ROOT_PATH ? ROOT_PATH : '/';
+		echo "<script>location.href = '$home_path';</script>";
+		if ($is_stop) {
+			die;
+		}
+		return;
 	}
-	if (!empty($page)) {
-		echo "<script>location.href = '/$page';</script>";
+	// Nếu bắt đầu bằng ~/ thì là đường dẫn tuyệt đối (absolute path)
+	if (strpos($page, '~/') === 0) {
+		$page = substr($page, 2); // Bỏ ký tự ~/
+		$page = '/' . ltrim($page, '/');
+		echo "<script>location.href = '$page';</script>";
+		if ($is_stop) {
+			die;
+		}
+		return;
 	}
+	// Ngược lại là đường dẫn tương đối (relative path)
+	$page = ltrim($page, '/');
+	$full_path = ROOT_PATH . '/' . $page;
+	$full_path = str_replace('//', '/', $full_path);
+	$full_path = '/' . ltrim($full_path, '/');
+	echo "<script>location.href = '$full_path';</script>";
 	if ($is_stop) {
 		die;
 	}
 }
 
-/*
- * In ra đường dẫn đến file ở thư mục asset
+/**
+ * Trả về URL đầy đủ (protocol + host + path) của file trong thư mục asset
+ * 
+ * URL bao gồm timestamp (file modification time) để tự động cập nhật cache khi file thay đổi
+ * VD output: http://localhost:8000/php_common_function/asset/css/style.css?1733270400
+ * 
+ * @param string|null $filename Tên file hoặc đường dẫn tương đối trong thư mục asset
+ * @param bool $return True (mặc định) để return giá trị, false để in trực tiếp
+ * @return string|null URL đầy đủ của file, hoặc null nếu $return = false
  */
 function asset(?string $filename, bool $return = true)
 {
@@ -62,16 +126,28 @@ function asset(?string $filename, bool $return = true)
 	$path = trim($filename, "/");
 	$full_path = ASSET_PATH . "/" . $path;
 
+	// Tạo URL đầy đủ với protocol và host
+	$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+	$host = $_SERVER['HTTP_HOST'];
+	$full_url = $protocol . "://" . $host . $full_path;
+
 	if (file_exists(DOCUMENT_ROOT_PATH . $full_path)) {
 		// Xóa cache khi cập nhật file asset bằng cách thêm param lần ghi cuối cùng
-		$full_path .= "?" . filemtime(DOCUMENT_ROOT_PATH . $full_path);
+		$full_url .= "?" . filemtime(DOCUMENT_ROOT_PATH . $full_path);
 	}
-	if ($return) return $full_path;
-	echo $full_path;
+	if ($return) return $full_url;
+	echo $full_url;
 }
 
-/*
- * In ra đường dẫn đến file ở thư mục upload
+/**
+ * Trả về URL đầy đủ (protocol + host + path) của file trong thư mục upload
+ * 
+ * URL bao gồm timestamp (file modification time) để tự động cập nhật cache khi file thay đổi
+ * VD output: http://localhost:8000/php_common_function/upload/image.jpg?1733270400
+ * 
+ * @param string|null $filename Tên file hoặc đường dẫn tương đối trong thư mục upload
+ * @param bool $return True (mặc định) để return giá trị, false để in trực tiếp
+ * @return string|null URL đầy đủ của file, hoặc null nếu $return = false
  */
 function upload(?string $filename, bool $return = true)
 {
@@ -79,17 +155,28 @@ function upload(?string $filename, bool $return = true)
 	$path = trim($filename, "/");
 	$full_path = UPLOAD_PATH . "/" . $path;
 
+	// Tạo URL đầy đủ với protocol và host
+	$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+	$host = $_SERVER['HTTP_HOST'];
+	$full_url = $protocol . "://" . $host . $full_path;
+
 	if (file_exists(DOCUMENT_ROOT_PATH . $full_path)) {
 		// Xóa cache khi cập nhật file asset bằng cách thêm param lần ghi cuối cùng
-		$full_path .= "?" . filemtime(DOCUMENT_ROOT_PATH . $full_path);
+		$full_url .= "?" . filemtime(DOCUMENT_ROOT_PATH . $full_path);
 	}
-	if ($return) return $full_path;
-	echo $full_path;
+	if ($return) return $full_url;
+	echo $full_url;
 }
 
-/*
- * Tải file lên và lưu vào thư mục upload, đồng thời trả về tên file
- * Nếu upload nhiều file thì trả về mảng các tên file
+/**
+ * Tải file lên server và lưu vào thư mục upload, trả về tên file đã lưu
+ * 
+ * Tên file sẽ được thêm timestamp để tránh trùng lặp
+ * Hỗ trợ upload đơn và nhiều file cùng lúc
+ * 
+ * @param string $name Tên của input field trong form ($_FILES[$name])
+ * @param string $sub_folder Thư mục con trong upload để lưu file (tự động tạo nếu chưa tồn tại)
+ * @return string|array|null Tên file (string) nếu upload 1 file, mảng tên file nếu upload nhiều, null nếu thất bại
  */
 function upload_and_return_filename(string $name, string $sub_folder = "")
 {
@@ -149,8 +236,11 @@ function upload_and_return_filename(string $name, string $sub_folder = "")
 	return null;
 }
 
-/*
- * Xóa file trong thư mục upload, return false nếu xóa thất bại
+/**
+ * Xóa file trong thư mục upload
+ * 
+ * @param string $filename Tên file hoặc đường dẫn tương đối trong thư mục upload
+ * @return bool True nếu xóa thành công, false nếu file không tồn tại hoặc xóa thất bại
  */
 function remove_file(string $filename): bool
 {
@@ -162,8 +252,13 @@ function remove_file(string $filename): bool
 	return false;
 }
 
-/*
- * database common function
+/**
+ * Tạo chuỗi type specifier cho prepared statement
+ * 
+ * Tất cả tham số được coi là string ("s")
+ * 
+ * @param array|null $data Mảng dữ liệu cần bind vào query
+ * @return string Chuỗi type specifier (VD: "sss" cho 3 tham số)
  */
 function get_sql_prepared(array $data = null)
 {
@@ -175,6 +270,13 @@ function get_sql_prepared(array $data = null)
 	return "";
 }
 
+/**
+ * Tạo kết nối MySQL từ thông tin trong config.php
+ * 
+ * Tự động bật error reporting và set charset UTF8
+ * 
+ * @return mysqli Kết nối database
+ */
 function get_mysqli()
 {
 	global $database;
@@ -184,7 +286,16 @@ function get_mysqli()
 	return $conn;
 }
 
-function execute_query(&$conn, $sql, $data)
+/**
+ * Thực thi prepared statement và trả về connection và query object
+ * 
+ * Hàm nội bộ được sử dụng bởi db_select() và db_execute()
+ * 
+ * @param string $sql Câu lệnh SQL với prepared statement (dùng ? cho placeholder)
+ * @param array|null $data Mảng tham số để bind vào query
+ * @return array Mảng chứa ['conn' => mysqli, 'query' => mysqli_stmt]
+ */
+function execute_query($sql, $data)
 {
 	$conn = get_mysqli();
 	$type = get_sql_prepared($data);
@@ -196,17 +307,28 @@ function execute_query(&$conn, $sql, $data)
 		$query->bind_param($type, ...$data);
 	}
 	$query->execute();
-	return $query;
+	return ['conn' => $conn, 'query' => $query];
 }
 
+/**
+ * Thực thi câu lệnh SELECT và trả về kết quả dưới dạng mảng associative
+ * 
+ * Sử dụng prepared statement để bảo mật (phòng chống SQL injection)
+ * 
+ * @param string $sql Câu lệnh SELECT với prepared statement (dùng ? cho placeholder)
+ * @param array|null $data Mảng tham số để bind vào query theo thứ tự
+ * @return array Mảng kết quả (associative array), mảng rỗng nếu không có dữ liệu
+ */
 function db_select(string $sql, array $data = null): array
 {
 	try {
-		$query = execute_query($conn, $sql, $data);
-		$result = $query->get_result();
+		$result = execute_query($sql, $data);
+		$conn = $result['conn'];
+		$query = $result['query'];
+		$query_result = $query->get_result();
 		$arr_result = [];
-		if ($result->num_rows > 0) {
-			while ($record = $result->fetch_assoc()) {
+		if ($query_result->num_rows > 0) {
+			while ($record = $query_result->fetch_assoc()) {
 				array_push($arr_result, $record);	// hoặc $arr_result[] = $record;
 			}
 		}
@@ -214,24 +336,46 @@ function db_select(string $sql, array $data = null): array
 		return $arr_result;
 	} catch (Exception $ex) {
 		dd($ex->getMessage(), "Query: $sql", $ex->getTraceAsString(), $data);
+		return [];
 	}
 }
 
+/**
+ * Thực thi các câu lệnh INSERT, UPDATE, DELETE
+ * 
+ * Sử dụng prepared statement để bảo mật (phòng chống SQL injection)
+ * 
+ * @param string $sql Câu lệnh SQL với prepared statement (dùng ? cho placeholder)
+ * @param array|null $data Mảng tham số để bind vào query theo thứ tự
+ * @param int|null $insert_id Biến reference để nhận ID của record vừa insert (nếu có)
+ * @return bool True nếu có ít nhất 1 row bị ảnh hưởng, false nếu không
+ */
 function db_execute(string $sql, array $data = null, &$insert_id = null): bool
 {
 	try {
-		$query = execute_query($conn, $sql, $data);
+		$result = execute_query($sql, $data);
+		$conn = $result['conn'];
+		$query = $result['query'];
 		$affected = $query->affected_rows;
 		$insert_id = $conn->insert_id;
 		$conn->close();
 		return $affected > 0;
 	} catch (Exception $ex) {
 		dd($ex->getMessage(), "Query: $sql", $ex->getTraceAsString(), $data);
+		return false;
 	}
 }
 
-/*
- * Dùng để tạo thẻ option (trong thẻ select) từ database
+/**
+ * Tạo các thẻ <option> cho thẻ <select> từ dữ liệu database
+ * 
+ * Tự động thêm thuộc tính 'selected' cho option khớp với $selected_value
+ * 
+ * @param string $table Tên bảng trong database
+ * @param string $col_value Tên cột dùng cho giá trị (value attribute), mặc định "id"
+ * @param string $col_text Tên cột dùng cho text hiển thị, mặc định "name"
+ * @param mixed $selected_value Giá trị được chọn mặc định (option sẽ có thuộc tính selected)
+ * @return void In trực tiếp các thẻ option ra màn hình
  */
 function gen_option_ele($table, $col_value = "`id`", $col_text = "`name`", $selected_value = "")
 {
@@ -256,11 +400,21 @@ function gen_option_ele($table, $col_value = "`id`", $col_text = "`name`", $sele
 	echo $str;
 }
 
-/*
- * Dump data
+/**
+ * Dump dữ liệu ra màn hình và dừng thực thi script (Die and Dump)
+ * 
+ * Tự động xóa toàn bộ output buffer trước khi hiển thị để đảm bảo
+ * nội dung debug không bị ẩn trong các thẻ HTML
+ * 
+ * @param mixed ...$data Một hoặc nhiều biến cần dump (có thể là bất kỳ kiểu dữ liệu nào)
+ * @return void Script sẽ dừng ngay sau khi hiển thị
  */
 function dd(...$data)
 {
+	// Xóa hết nội dung output buffer để đảm bảo nội dung hiển thị không bị ẩn
+	while (ob_get_level()) {
+		ob_end_clean();
+	}
 	$textArr = ["Dump data..."];
 	foreach ($data as $x) {
 		$textArr[] = print_r($x, true);

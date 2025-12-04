@@ -7,31 +7,60 @@ Cách dùng:
 
 ## Danh sách các function được hỗ trợ, hoạt động tốt nhất với cấu hình mặc định của XAMPP
 
-### 1. `dd($data1, $data2, ...)`
+### 1. `dd(...$data)`
 
-Dump data ra màn hình *và dừng xử lý*
-> data có thể là bất cứ thứ gì, có thể dump bao nhiêu biến tùy thích
+Dump data ra màn hình *và dừng xử lý*. Tự động xóa toàn bộ output buffer trước khi hiển thị để đảm bảo nội dung không bị ẩn trong các thẻ HTML.
+
+```php
+dd($variable);                    // Dump 1 biến
+dd($var1, $var2, $var3);         // Dump nhiều biến
+dd($array, "Debug info", $object); // Dump các kiểu dữ liệu khác nhau
+```
+
+> Data có thể là bất cứ thứ gì: string, array, object, số...
 
 ### 2. `js_alert(string $text)`
 
 Hiển thị alert của JS
 
-### 3. `redirect_to(string $page)` và `js_redirect_to(string $page)`
+### 3. `redirect_to(string $page)` và `js_redirect_to(string $page, bool $is_stop = true)`
 
-Chuyển hướng đến trang trong hệ thống, không bao gồm thư mục gốc.
-Ví dụ: nếu website đặt ở `htdocs/test` và bạn muốn chuyển hướng đến `test/admin/abc.php` thì chỉ cần viết
-`redirect_to("admin/abc.php")` hoặc  `js_redirect_to("admin/abc.php")`
-> Lưu ý rằng hàm này chỉ cho phép chuyển hướng dựa trên đường dẫn tuyệt đối, chưa hỗ trợ chuyển hướng bằng đường dẫn tương đối
->
-> Hàm `js_redirect_to()` sử dụng JavaScript để chuyển hướng, dùng khi muốn thông báo (`js_alert()`) và chuyển hướng trang
+Chuyển hướng đến trang trong hệ thống với 3 chế độ:
+- **Đường dẫn tương đối**: Tự động thêm ROOT_PATH. VD: `redirect_to("admin/abc.php")` → `/php_common_function/admin/abc.php`
+- **Đường dẫn tuyệt đối**: Bắt đầu bằng `~/` để bỏ qua ROOT_PATH. VD: `redirect_to("~/admin/abc.php")` → `/admin/abc.php`
+- **Trang chủ**: Dùng `redirect_to("/")` để về trang chủ
+
+```php
+// Chuyển hướng tương đối (bao gồm ROOT_PATH)
+redirect_to("admin/index.php");
+
+// Chuyển hướng tuyệt đối (bỏ qua ROOT_PATH)
+redirect_to("~/login.php");
+
+// Về trang chủ
+redirect_to("/");
+
+// JavaScript redirect (có thể tắt auto-stop)
+js_redirect_to("admin/index.php", false);
+```
+
+> Hàm `js_redirect_to()` sử dụng JavaScript để chuyển hướng, dùng khi muốn thông báo (`js_alert()`) trước khi chuyển hướng. Tham số `$is_stop` mặc định là `true` (dừng xử lý sau khi redirect)
 
 ### 4. Hàm hỗ trợ kiểm tra HttpMethod `is_post_method(): bool` và `is_get_method(): bool`
 
 Như tên hàm, cho phép kiểm tra request là POST hay GET
 
-### 5. `asset(string $filename, bool $return = true): null|string`
+```php
+if (is_get_method()) {
+	// Load data ...
+}
+```
 
-Cho phép lấy đường dẫn file CSS/JS/ảnh từ thư mục asset và in ra trình duyệt, đường dẫn bao gồm param để cập nhật ngay lập tức khi file có thay đổi.
+### 5. `asset(?string $filename, bool $return = true): null|string`
+
+Trả về URL đầy đủ (bao gồm protocol và host) của file CSS/JS/ảnh từ thư mục asset. URL bao gồm timestamp để cập nhật cache ngay lập tức khi file có thay đổi.
+
+**Ví dụ output**: `http://localhost:8000/php_common_function/asset/css/style.css?1733270400`
 
 > Thư mục asset có thể được cấu hình ở file `config.php`
 
@@ -39,22 +68,27 @@ Cho phép lấy đường dẫn file CSS/JS/ảnh từ thư mục asset và in r
 // CSS
 <link rel="stylesheet" href="<?= asset("css/style.css"); ?>">
 
-// hoặc
-<link rel="stylesheet" href="<?php echo asset("css/style.css", false); ?>">
+// In trực tiếp (không return)
+<link rel="stylesheet" href="<?php asset("css/style.css", false); ?>">
 
 // JS
 <script src="<?= asset("js/script.js"); ?>"></script>
 ```
 
-### 6. `upload(string $filename, bool $return = true): null|string`
+### 6. `upload(?string $filename, bool $return = true): null|string`
 
-Tương tự như hàm `asset` nhưng dùng cho file upload bởi user (file upload được đặt ở thư mục riêng).
+Trả về URL đầy đủ (bao gồm protocol và host) của file được upload bởi user. URL bao gồm timestamp để cập nhật cache ngay lập tức khi file có thay đổi.
 
-> Thư mục upload cũng có thể được cấu hình ở file `config.php`
+**Ví dụ output**: `http://localhost:8000/php_common_function/upload/abc.jpg?1733270400`
+
+> Thư mục upload có thể được cấu hình ở file `config.php`
 
 ```php
 // Hiển thị ảnh được upload bởi user
 <img src="<?= upload("abc.jpg"); ?>" />
+
+// Tải file
+<a href="<?= upload("document.pdf"); ?>">Download</a>
 ```
 
 ### 7. `upload_and_return_filename(string $name, string $sub_folder = ""): string|array`
